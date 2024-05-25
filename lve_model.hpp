@@ -40,6 +40,7 @@ namespace lve {
         LveModel(LveDevice& device, const LveModel::Builder& builder);
         ~LveModel();
 
+        //LveModel() = default;
         LveModel(const LveModel&) = delete;
         LveModel& operator=(const LveModel&) = delete;
 
@@ -48,6 +49,10 @@ namespace lve {
 
         void bind(VkCommandBuffer commandBuffer);
         void draw(VkCommandBuffer commandBuffer);
+
+        //later let's add some blinn phong exponent term either here or in the Vertex Struct
+        // this term needs to be properly bound so it can be accessed in the point_light/mesh render system
+        float blinnPhongTerm = 32.f;
 
     private:
         void createVertexBuffers(const std::vector<Vertex>& vertices);

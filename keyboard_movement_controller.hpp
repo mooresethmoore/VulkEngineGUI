@@ -2,6 +2,7 @@
 
 #include "lve_game_object.hpp"
 #include "lve_window.hpp"
+#include "entity_components.hpp"
 
 
 //https://www.glfw.org/docs/3.3/input_guide.html 
@@ -25,6 +26,7 @@ namespace lve {
 		};
 
 		void moveInPlaneXZ(GLFWwindow* window, float dt, LveGameObject& gameObject);
+		void moveInPlaneXZ(GLFWwindow* window, float dt, TransformComponent& transform);
 
 		KeyMappings keys{};
 		float moveSpeed{ 3.f };
