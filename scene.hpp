@@ -30,9 +30,9 @@ namespace lve {
 
 		std::shared_ptr<entt::entity> loadObj(const std::string& filepath, const std::string& objName, glm::vec3 color = {0.f,0.f,0.f});
 		std::shared_ptr<entt::entity> makePointLightObj(float intensity = 10.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f), const std::string& objName="NoName");
-
+		std::shared_ptr<entt::entity> makeCameraObj(glm::vec3 initialPosition = { 0.f,0.f,0.f }, const std::string& objName = "camera");
 		template <typename ComponentType>
-		std::shared_ptr<ComponentType> getComponent(entt::entity entity);
+		ComponentType* getComponent(entt::entity entity);
 		
 		
 		std::map<std::string, entt::entity> entityMap;

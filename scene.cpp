@@ -148,6 +148,7 @@ namespace lve {
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .build();
         loadGameObjects();
+        loadGameObjects2();
         init_imgui();
     }
 
@@ -388,31 +389,45 @@ namespace lve {
         return std::make_shared<entt::entity>(gameObj);
     }
 
+    std::shared_ptr<entt::entity> Scene::makeCameraObj(glm::vec3 initialPosition, const std::string& objName) {
+        entt::entity gameObj = registry.create();
+        entityMap[objName] = gameObj; // not checking for name overlap for now, don't do it
+        auto& transform = registry.emplace<TransformComponent>(gameObj);
+        transform.translation = initialPosition;
+        auto& cameraController = registry.emplace<KeyboardMovementController>(gameObj);
+        
+        auto& camera = registry.emplace<LveCamera>(gameObj);
+
+        return std::make_shared<entt::entity>(gameObj);
+
+    }
+
     template <typename ComponentType> 
-    std::shared_ptr<ComponentType> Scene::getComponent(entt::entity entity) {
-        auto* componentPtr = registry.try_get<ComponentType>(entity);
+    ComponentType* Scene::getComponent(entt::entity entity) {
+        /*auto* componentPtr = registry.try_get<ComponentType>(entity);
         if (componentPtr) {
             return std::shared_ptr<ComponentType>{componentPtr};
         }
         else {
             return nullptr;
-        }
-
+        }*/
+        return registry.try_get<ComponentType>(entity);
     }
 
     void Scene::loadGameObjects2() {
         
         auto flatVase = loadObj("models/dice.obj", "flatVase");
-
+        
         {
             auto transform = getComponent<TransformComponent>(*flatVase); // smrt ptr to component
+            //auto transform = registry.try_get<TransformComponent>(*flatVase);
             if (transform) {
                 transform->translation = { -.5f, .5f, 0.f };
                 transform->scale = { 3.f, 1.5f, 3.f };
             }
             
         }
-
+        
         auto smoothVase = loadObj("models/smooth_vase.obj", "smoothVase");
 
         {
@@ -434,7 +449,7 @@ namespace lve {
             }
 
         }
-
+        
         float lightIntensity = 0.2f;
         float lightRadius = .1f;
         std::vector<glm::vec3> lightColors{
@@ -459,10 +474,43 @@ namespace lve {
         }
 
 
-
+        
     }
 
     void Scene::run2() {
+        std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < uboBuffers.size(); i++) {
+            uboBuffers[i] = std::make_unique<LveBuffer>(
+                lveDevice,
+                sizeof(GlobalUbo),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+            uboBuffers[i]->map();
+        }
+
+        auto globalSetLayout =
+            LveDescriptorSetLayout::Builder(lveDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+            .build();
+
+        std::vector<VkDescriptorSet> globalDescriptorSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < globalDescriptorSets.size(); i++) {
+            auto bufferInfo = uboBuffers[i]->descriptorInfo();
+            LveDescriptorWriter(*globalSetLayout, *globalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
+        }
+
+        SimpleRenderSystem simpleRenderSystem{
+            lveDevice,
+            lveRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout() };
+        PointLightSystem pointLightSystem{
+            lveDevice,
+            lveRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout() };
+
 
     }
 }  // namespace lve
