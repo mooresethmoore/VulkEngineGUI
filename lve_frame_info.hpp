@@ -6,6 +6,8 @@
 // lib
 #include <vulkan/vulkan.h>
 
+#include "dependencies/entt.hpp"
+
 namespace lve {
 
 #define MAX_LIGHTS 10
@@ -32,4 +34,14 @@ namespace lve {
 		VkDescriptorSet globalDescriptorSet;
 		LveGameObject::Map& gameObjects;
 	};
+
+	struct FrameInfo2 {
+		int frameIndex;
+		float frameTime;
+		VkCommandBuffer commandBuffer;
+		LveCamera& camera;
+		VkDescriptorSet globalDescriptorSet;
+		entt::registry* registry;
+	};
+
 }  // namespace lve

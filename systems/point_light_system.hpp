@@ -23,6 +23,9 @@ namespace lve {
         void update(FrameInfo& frameInfo, GlobalUbo& ubo);
         void render(FrameInfo& frameInfo);
 
+        void update(FrameInfo2& frameInfo, GlobalUbo& ubo);
+        void render(FrameInfo2& frameInfo);
+
     private:
         void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void createPipeline(VkRenderPass renderPass);

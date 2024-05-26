@@ -511,6 +511,49 @@ namespace lve {
             lveRenderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout() };
 
+        auto cameraObj = makeCameraObj({ 0.f,0.f,-2.5f }, "camera");
+        auto cameraPtr = getComponent<LveCamera>(*cameraObj);
+        auto cameraController = getComponent<KeyboardMovementController>(*cameraObj);
+        bool show_demo_window = true; //imgui demo
+        bool show_another_window = true; //imgui demo
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+        auto currentTime = std::chrono::high_resolution_clock::now();
+
+        while (!lveWindow.shouldClose()) {
+            glfwPollEvents();
+
+            auto newTime = std::chrono::high_resolution_clock::now();
+            float frameTime =
+                std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+            currentTime = newTime;
+            auto transform = (getComponent<TransformComponent>(*cameraObj));
+            cameraController->moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, *transform);
+            cameraPtr->setViewYXZ(transform->translation, transform->rotation);
+            float aspect = lveRenderer.getAspectRatio();
+            cameraPtr->setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
+
+            if (auto commandBuffer = lveRenderer.beginFrame()) {
+                int frameIndex = lveRenderer.getFrameIndex();
+                FrameInfo2 frameInfo{
+                    frameIndex,
+                    frameTime,
+                    commandBuffer,
+                    *cameraPtr,
+                    globalDescriptorSets[frameIndex],
+                    &registry };
+
+                // update
+                GlobalUbo ubo{};
+                ubo.projection = cameraPtr->getProjection();
+                ubo.view = cameraPtr->getView();
+                ubo.inverseView = cameraPtr->getInverseView();
+
+                pointLightSystem.update(frameInfo, ubo);
+                uboBuffers[frameIndex]->writeToBuffer(&ubo);
+                uboBuffers[frameIndex]->flush();
+
+            }
+        }
     }
 }  // namespace lve

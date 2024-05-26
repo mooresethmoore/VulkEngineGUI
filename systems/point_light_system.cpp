@@ -89,6 +89,10 @@ namespace lve {
         ubo.numLights = lightIndex;
     }
 
+    void PointLightSystem::update(FrameInfo2& frameInfo, GlobalUbo& ubo) {
+
+    }
+
     void PointLightSystem::render(FrameInfo& frameInfo) {
         //sort semitransparent
         std::map<float, LveGameObject::id_t> sorted;
@@ -133,6 +137,11 @@ namespace lve {
                 &push);
             vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
         }
+    }
+
+    void PointLightSystem::render(FrameInfo2& frameInfo) {
+    
+    
     }
 
 }  // namespace lve

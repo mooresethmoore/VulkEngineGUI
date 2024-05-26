@@ -45,7 +45,7 @@ namespace lve {
 		void loadGameObjects();
 		void loadGameObjects2();
 
-		LveWindow lveWindow{ WIDTH, HEIGHT, "Vulkan Tutorial" };
+		LveWindow lveWindow{ WIDTH, HEIGHT, "Scene Editor!" };
 		LveDevice lveDevice{ lveWindow };
 		LveRenderer lveRenderer{ lveWindow, lveDevice };
 
