@@ -67,10 +67,14 @@ namespace lve {
     void TransformComponent::imgui_editor() {
         // to be used within the context of a ImGui::Begin(f"<Transform Component>"); -- ImGui::End();
     }
-    /*
+    
     void PointLightComponent::imgui_editor() {
 
-    }*/
+    }
+
+    void ColorComponent::imgui_editor() {
+
+    }
 }
 
 

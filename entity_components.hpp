@@ -29,7 +29,7 @@ namespace lve {
 
 
 
-       // void imgui_editor();
+       void imgui_editor();
     };
 
 
@@ -38,7 +38,7 @@ namespace lve {
 
 
 
-        //void imgui_editor();
+        void imgui_editor();
     };
 
 
