@@ -147,7 +147,7 @@ namespace lve {
             .setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .build();
-        loadGameObjects();
+        //loadGameObjects();
         loadGameObjects2();
         init_imgui();
     }
@@ -553,7 +553,66 @@ namespace lve {
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
+
+                // render
+                lveRenderer.beginSwapChainRenderPass(commandBuffer);
+
+
+                ImGui_ImplVulkan_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
+                // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+                {
+                    static float f = 0.0f;
+                    static int counter = 0;
+
+                    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+                    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+                    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+                    ImGui::Checkbox("Another Window", &show_another_window);
+
+                    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+                    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                        counter++;
+                    ImGui::SameLine();
+                    ImGui::Text("counter = %d", counter);
+
+                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", frameTime * 1000, 1.0 / frameTime);
+                    ImGui::End();
+                }
+                if (show_demo_window)
+                    ImGui::ShowDemoWindow(&show_demo_window);
+
+
+                //let's try a simple inspector window here
+                // then we will work on constructing an ECS, and writing specific subroutines for displaying &
+                // modifying relevant params within each gameobject in the registry, based on components
+
+                ImGui::Render();
+
+
+
+
+
+                //order matters
+                simpleRenderSystem.renderGameObjects(frameInfo);
+                pointLightSystem.render(frameInfo);
+
+
+                ImDrawData* main_draw_data = ImGui::GetDrawData();
+                const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+
+                ImGui_ImplVulkan_RenderDrawData(main_draw_data, lveRenderer.getCurrentCommandBuffer());
+
+
+                lveRenderer.endSwapChainRenderPass(commandBuffer);
+                lveRenderer.endFrame();
             }
         }
+
+        vkDeviceWaitIdle(lveDevice.device());
     }
 }  // namespace lve

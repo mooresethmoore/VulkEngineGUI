@@ -95,4 +95,41 @@ namespace lve {
         }
     }
 
+    void SimpleRenderSystem::renderGameObjects(FrameInfo2& frameInfo) {
+        lvePipeline->bind(frameInfo.commandBuffer);
+
+        vkCmdBindDescriptorSets(
+            frameInfo.commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout,
+            0,
+            1,
+            &frameInfo.globalDescriptorSet,
+            0,
+            nullptr);
+
+
+
+        for (auto& obj : frameInfo.registry->view <std::shared_ptr<LveModel>, TransformComponent>()) {
+            
+            TransformComponent& transform = frameInfo.registry->get<TransformComponent>(obj);
+            SimplePushConstantData push{};
+            push.modelMatrix = transform.mat4();
+            push.normalMatrix = transform.normalMatrix();
+
+            vkCmdPushConstants(
+                frameInfo.commandBuffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push);
+
+            std::shared_ptr<LveModel> model = frameInfo.registry->get<std::shared_ptr<LveModel>>(obj);
+            model->bind(frameInfo.commandBuffer); //for shared models in future, I dont think this method works
+            model->draw(frameInfo.commandBuffer);
+        }
+
+    }
+
 }  // namespace lve

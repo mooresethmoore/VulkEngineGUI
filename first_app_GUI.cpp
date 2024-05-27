@@ -44,7 +44,7 @@ namespace lve {
     }
 
     void FirstAppGUI::run() {
-        scene.run();
+        scene.run2();
     }
 
 }  // namespace lve
