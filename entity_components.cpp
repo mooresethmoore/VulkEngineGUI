@@ -66,6 +66,15 @@ namespace lve {
     
     void TransformComponent::imgui_editor() {
         // to be used within the context of a ImGui::Begin(f"<Transform Component>"); -- ImGui::End();
+        if (ImGui::TreeNode("Transform")) {
+            //static float position[3] = {translation[0],translation[1],translation[2]};
+            //ImGui::InputFloat3("Position", { translation[0],translation[1],translation[2] });
+
+            //posPtr = glm::value_ptr(translation);
+            ImGui::InputFloat3("Position", glm::value_ptr(translation));
+            ImGui::InputFloat3("Scale", glm::value_ptr(scale));
+            ImGui::TreePop();
+        }
     }
     
     void PointLightComponent::imgui_editor() {
@@ -73,7 +82,12 @@ namespace lve {
     }
 
     void ColorComponent::imgui_editor() {
+        if (ImGui::TreeNode("Color")) {
+            ImGui::ColorEdit3("Color", glm::value_ptr(color));
 
+
+            ImGui::TreePop();
+        }
     }
 }
 

@@ -461,7 +461,7 @@ namespace lve {
              {1.f, 1.f, 1.f}  //
         };
         for (int i = 0; i < lightColors.size(); i++) {
-            auto pointLight = makePointLightObj(lightIntensity,lightRadius,lightColors[i],"light"+i);
+            auto pointLight = makePointLightObj(lightIntensity,lightRadius,lightColors[i],"light"+std::to_string(i));
             
             auto rotateLight = glm::rotate(glm::mat4(1.f),
                 (i * glm::two_pi<float>()) / lightColors.size(),
@@ -516,6 +516,9 @@ namespace lve {
         auto cameraController = getComponent<KeyboardMovementController>(*cameraObj);
         bool show_demo_window = true; //imgui demo
         bool show_another_window = true; //imgui demo
+
+        bool show_render_window = true; 
+
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -561,24 +564,37 @@ namespace lve {
                 ImGui_ImplVulkan_NewFrame();
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
+                
                 // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+                if(show_render_window)
                 {
-                    static float f = 0.0f;
-                    static int counter = 0;
 
-                    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+                    ImGui::Begin("Renderer (I barely know her)");                          // Create a window called "Hello, world!" and append into it.
 
-                    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
                     ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-                    ImGui::Checkbox("Another Window", &show_another_window);
 
-                    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-                    ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+                    
+                    for (auto& kv : entityMap) {
+                        const std::string& name = kv.first;
+                        //ImGui::CollapsingHeader("Inputs & Focus")
+                        //ImGui::TreeNode(name.c_str())
+                        if (name!="" && ImGui::CollapsingHeader(name.c_str())) {
+                            //search the way we did before, 
+                            // through all relevant component prototypes that have imgui_editor implementation
+                            auto transform = getComponent<TransformComponent>(kv.second);
+                            if (transform) {
+                                transform->imgui_editor();
+                            }
+                            auto color = getComponent<ColorComponent>(kv.second);
+                            if (color) {
+                                color->imgui_editor();
 
-                    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                        counter++;
-                    ImGui::SameLine();
-                    ImGui::Text("counter = %d", counter);
+                            }
+                            //ImGui::TreePop();
+                        }
+                    }
+
+
 
                     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", frameTime * 1000, 1.0 / frameTime);
                     ImGui::End();

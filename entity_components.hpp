@@ -1,12 +1,13 @@
 #pragma once
 
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <glm/gtc/type_ptr.hpp>
+#include "dependencies/imgui.h"
 
 namespace lve {
 
     struct TransformComponent {
-        glm::vec3 translation{};
+        glm::vec3 translation{0.f,0.f,0.f};
         glm::vec3 scale{ 1.f, 1.f, 1.f };
         glm::vec3 rotation{};
 
