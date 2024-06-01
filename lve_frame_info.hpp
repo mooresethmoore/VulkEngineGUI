@@ -26,16 +26,8 @@ namespace lve {
 		int numLights;
 	};
 
-	struct FrameInfo {
-		int frameIndex;
-		float frameTime;
-		VkCommandBuffer commandBuffer;
-		LveCamera& camera;
-		VkDescriptorSet globalDescriptorSet;
-		LveGameObject::Map& gameObjects;
-	};
 
-	struct FrameInfo2 {
+	struct FrameInfo {
 		int frameIndex;
 		float frameTime;
 		VkCommandBuffer commandBuffer;

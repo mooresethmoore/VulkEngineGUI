@@ -130,7 +130,7 @@ namespace lve {
         ImGui_ImplVulkan_Init(&init_info);
 
         //io.Fonts->AddFontDefault();
-        io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 18.0f);
+        io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 32.0f);
 
         ImGui_ImplVulkan_CreateFontsTexture();
 
@@ -147,8 +147,7 @@ namespace lve {
             .setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .build();
-        //loadGameObjects();
-        loadGameObjects2();
+        loadGameObjects();
         init_imgui();
     }
 
@@ -162,198 +161,6 @@ namespace lve {
         vkDestroyDescriptorPool(lveDevice.device(), imguiPool, nullptr);
     }
 
-    void Scene::run() {
-        std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
-        for (int i = 0; i < uboBuffers.size(); i++) {
-            uboBuffers[i] = std::make_unique<LveBuffer>(
-                lveDevice,
-                sizeof(GlobalUbo),
-                1,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-            uboBuffers[i]->map();
-        }
-
-        auto globalSetLayout =
-            LveDescriptorSetLayout::Builder(lveDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-            .build();
-
-        std::vector<VkDescriptorSet> globalDescriptorSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
-        for (int i = 0; i < globalDescriptorSets.size(); i++) {
-            auto bufferInfo = uboBuffers[i]->descriptorInfo();
-            LveDescriptorWriter(*globalSetLayout, *globalPool)
-                .writeBuffer(0, &bufferInfo)
-                .build(globalDescriptorSets[i]);
-        }
-
-        SimpleRenderSystem simpleRenderSystem{
-            lveDevice,
-            lveRenderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout() };
-        PointLightSystem pointLightSystem{
-            lveDevice,
-            lveRenderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout() };
-
-        LveCamera camera{};
-
-        auto viewerObject = LveGameObject::createGameObject();
-        viewerObject.transform.translation.z = -2.5f;
-        KeyboardMovementController cameraController{};
-
-        bool show_demo_window = true; //imgui demo
-        bool show_another_window = true; //imgui demo
-        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        while (!lveWindow.shouldClose()) {
-            glfwPollEvents();
-
-            auto newTime = std::chrono::high_resolution_clock::now();
-            float frameTime =
-                std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
-            currentTime = newTime;
-
-            cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
-            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
-
-            float aspect = lveRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
-
-            if (auto commandBuffer = lveRenderer.beginFrame()) {
-                int frameIndex = lveRenderer.getFrameIndex();
-
-
-                FrameInfo frameInfo{
-                    frameIndex,
-                    frameTime,
-                    commandBuffer,
-                    camera,
-                    globalDescriptorSets[frameIndex],
-                    gameObjects };
-
-                // update
-                GlobalUbo ubo{};
-                ubo.projection = camera.getProjection();
-                ubo.view = camera.getView();
-                ubo.inverseView = camera.getInverseView();
-                pointLightSystem.update(frameInfo, ubo);
-                uboBuffers[frameIndex]->writeToBuffer(&ubo);
-                uboBuffers[frameIndex]->flush();
-
-
-
-                // render
-                lveRenderer.beginSwapChainRenderPass(commandBuffer);
-
-
-                ImGui_ImplVulkan_NewFrame();
-                ImGui_ImplGlfw_NewFrame();
-                ImGui::NewFrame();
-                // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-                {
-                    static float f = 0.0f;
-                    static int counter = 0;
-
-                    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-                    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-                    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-                    ImGui::Checkbox("Another Window", &show_another_window);
-
-                    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-                    ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-                    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                        counter++;
-                    ImGui::SameLine();
-                    ImGui::Text("counter = %d", counter);
-
-                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", frameTime * 1000, 1.0 / frameTime);
-                    ImGui::End();
-                }
-                if (show_demo_window)
-                    ImGui::ShowDemoWindow(&show_demo_window);
-
-
-                //let's try a simple inspector window here
-                // then we will work on constructing an ECS, and writing specific subroutines for displaying &
-                // modifying relevant params within each gameobject in the registry, based on components
-
-                ImGui::Render();
-
-                
-
-
-
-                //order matters
-                simpleRenderSystem.renderGameObjects(frameInfo);
-                pointLightSystem.render(frameInfo);
-
-
-                ImDrawData* main_draw_data = ImGui::GetDrawData();
-                const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
-
-                ImGui_ImplVulkan_RenderDrawData(main_draw_data, lveRenderer.getCurrentCommandBuffer());
-
-
-                lveRenderer.endSwapChainRenderPass(commandBuffer);
-                lveRenderer.endFrame();
-            }
-        }
-
-        vkDeviceWaitIdle(lveDevice.device());
-    }
-
-    void Scene::loadGameObjects() {
-        std::shared_ptr<LveModel> lveModel =
-            LveModel::createModelFromFile(lveDevice, "models/dice.obj");
-        auto flatVase = LveGameObject::createGameObject();
-        flatVase.model = lveModel;
-        flatVase.transform.translation = { -.5f, .5f, 0.f };
-        flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-        gameObjects.emplace(flatVase.getId(), std::move(flatVase));
-
-        lveModel = LveModel::createModelFromFile(lveDevice, "models/smooth_vase.obj");
-        auto smoothVase = LveGameObject::createGameObject();
-        smoothVase.model = lveModel;
-        smoothVase.transform.translation = { .5f, .5f, 0.f };
-        smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-        smoothVase.color = { 1.f,0.f,0.f }; //not getting renderered
-        gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
-
-        lveModel = LveModel::createModelFromFile(lveDevice, "models/quad.obj");
-        auto floor = LveGameObject::createGameObject();
-        floor.model = lveModel;
-        floor.transform.translation = { 0.f, .5f, 0.f };
-        floor.transform.scale = { 3.f, 1.f, 3.f };
-        gameObjects.emplace(floor.getId(), std::move(floor));
-
-        float lightIntensity = 0.2f;
-        // auto pointLight = LveGameObject::makePointLight(lightIntensity);
-         //gameObjects.emplace(pointLight.getId(), std::move(pointLight));
-
-        std::vector<glm::vec3> lightColors{
-             {1.f, .1f, .1f},
-             {.1f, .1f, 1.f},
-             {.1f, 1.f, .1f},
-             {1.f, 1.f, .1f},
-             {.1f, 1.f, 1.f},
-             {1.f, 1.f, 1.f}  //
-        };
-
-        for (int i = 0; i < lightColors.size(); i++) {
-            auto pointLight = LveGameObject::makePointLight(lightIntensity);
-            pointLight.color = lightColors[i];
-            auto rotateLight = glm::rotate(glm::mat4(1.f),
-                (i * glm::two_pi<float>()) / lightColors.size(),
-                { 0.f,-1.f,0.f });
-            pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
-            gameObjects.emplace(pointLight.getId(), std::move(pointLight));
-        }
-
-    }
 
     std::shared_ptr<entt::entity> Scene::loadObj(const std::string& filepath, const std::string& objName, glm::vec3 color){
         std::shared_ptr<LveModel> lveModel =
@@ -414,7 +221,7 @@ namespace lve {
         return registry.try_get<ComponentType>(entity);
     }
 
-    void Scene::loadGameObjects2() {
+    void Scene::loadGameObjects() {
         
         auto flatVase = loadObj("models/dice.obj", "flatVase");
         
@@ -477,7 +284,7 @@ namespace lve {
         
     }
 
-    void Scene::run2() {
+    void Scene::run() {
         std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<LveBuffer>(
@@ -538,7 +345,7 @@ namespace lve {
 
             if (auto commandBuffer = lveRenderer.beginFrame()) {
                 int frameIndex = lveRenderer.getFrameIndex();
-                FrameInfo2 frameInfo{
+                FrameInfo frameInfo{
                     frameIndex,
                     frameTime,
                     commandBuffer,
@@ -576,7 +383,6 @@ namespace lve {
                     
                     for (auto& kv : entityMap) {
                         const std::string& name = kv.first;
-                        //ImGui::CollapsingHeader("Inputs & Focus")
                         //ImGui::TreeNode(name.c_str())
                         if (name!="" && ImGui::CollapsingHeader(name.c_str())) {
                             //search the way we did before, 
@@ -603,9 +409,7 @@ namespace lve {
                     ImGui::ShowDemoWindow(&show_demo_window);
 
 
-                //let's try a simple inspector window here
-                // then we will work on constructing an ECS, and writing specific subroutines for displaying &
-                // modifying relevant params within each gameobject in the registry, based on components
+                
 
                 ImGui::Render();
 

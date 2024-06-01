@@ -38,12 +38,10 @@ namespace lve {
 		std::map<std::string, entt::entity> entityMap;
 
 		void run();
-		void run2();
 		
 
 	private:
 		void loadGameObjects();
-		void loadGameObjects2();
 
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Scene Editor!" };
 		LveDevice lveDevice{ lveWindow };

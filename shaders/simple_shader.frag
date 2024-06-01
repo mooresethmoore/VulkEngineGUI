@@ -47,9 +47,9 @@ void main() {
     vec3 halfAngle = normalize(directionToLight + viewDirection);
     float blinnTerm = dot(surfaceNormal, halfAngle);
     blinnTerm= clamp(blinnTerm,0,1);
-    blinnTerm = pow(blinnTerm,512.0); // how sharp is the highlight? maybe this should be referenced within a material class
+    blinnTerm = pow(blinnTerm,32.0); // how sharp is the highlight? maybe this should be referenced within a material class
     specularLight+=intensity*blinnTerm;
   }
   
-  outColor = vec4((diffuseLight+specularLight) * fragColor, 1.0);
+  outColor = vec4((diffuseLight+specularLight) * fragColor, 1.0);//vec4((diffuseLight) * fragColor, 1.0);//
 }

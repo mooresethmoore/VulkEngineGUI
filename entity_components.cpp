@@ -72,6 +72,7 @@ namespace lve {
 
             //posPtr = glm::value_ptr(translation);
             ImGui::InputFloat3("Position", glm::value_ptr(translation));
+            ImGui::InputFloat3("Rotation (Tait-Bryan YXZ)", glm::value_ptr(rotation));
             ImGui::InputFloat3("Scale", glm::value_ptr(scale));
             ImGui::TreePop();
         }
