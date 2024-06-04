@@ -162,11 +162,14 @@ namespace lve {
                         attrib.vertices[3 * index.vertex_index + 2],
                     };
 
+                    //vertex.color = { 1.f,0.f,0.f };
+                    
                     vertex.color = {
                         attrib.colors[3 * index.vertex_index + 0],
                         attrib.colors[3 * index.vertex_index + 1],
                         attrib.colors[3 * index.vertex_index + 2],
                     };
+                    
                 }
 
                 if (index.normal_index >= 0) {

@@ -6,6 +6,7 @@
 #include "lve_camera.hpp"
 #include "systems/simple_render_system.hpp"
 #include "systems/point_light_system.hpp"
+#include "systems/mesh_render_system.hpp"
 // libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -223,10 +224,10 @@ namespace lve {
 
     void Scene::loadGameObjects() {
         
-        auto flatVase = loadObj("models/dice.obj", "flatVase");
+        auto dice = loadObj("models/dice.obj", "dice");
         
         {
-            auto transform = getComponent<TransformComponent>(*flatVase); // smrt ptr to component
+            auto transform = getComponent<TransformComponent>(*dice); // smrt ptr to component
             //auto transform = registry.try_get<TransformComponent>(*flatVase);
             if (transform) {
                 transform->translation = { -.5f, .5f, 0.f };
@@ -235,7 +236,7 @@ namespace lve {
             
         }
         
-        auto smoothVase = loadObj("models/smooth_vase.obj", "smoothVase");
+        auto smoothVase = loadObj("models/smooth_vase.obj", "smoothVase",{1.f,0.f,0.f});
 
         {
             auto transform = getComponent<TransformComponent>(*smoothVase);
@@ -309,10 +310,16 @@ namespace lve {
                 .build(globalDescriptorSets[i]);
         }
 
+        MeshRenderSystem simpleRenderSystem{
+            lveDevice,
+            lveRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout() };
+        /*
         SimpleRenderSystem simpleRenderSystem{
             lveDevice,
             lveRenderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout() };
+            */
         PointLightSystem pointLightSystem{
             lveDevice,
             lveRenderer.getSwapChainRenderPass(),
