@@ -52,7 +52,7 @@ namespace lve {
 
         //later let's add some blinn phong exponent term either here or in the Vertex Struct
         // this term needs to be properly bound so it can be accessed in the point_light/mesh render system
-        float blinnPhongTerm = 32.f;
+        float blinnPhongTerm = 512.f;
 
     private:
         void createVertexBuffers(const std::vector<Vertex>& vertices);

@@ -14,7 +14,8 @@ namespace lve {
 
     class LveSwapChain {
     public:
-        static constexpr int MAX_FRAMES_IN_FLIGHT = LveDevice::MAX_FRAMES_IN_FLIGHT;
+        //static constexpr int MAX_FRAMES_IN_FLIGHT = LveDevice::MAX_FRAMES_IN_FLIGHT;
+        static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         LveSwapChain(LveDevice& deviceRef, VkExtent2D windowExtent);
         LveSwapChain(

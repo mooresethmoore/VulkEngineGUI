@@ -32,7 +32,7 @@ namespace lve {
         const bool enableValidationLayers = true;
 #endif
 
-        static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+        //static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         LveDevice(LveWindow& window);
         ~LveDevice();
@@ -77,7 +77,6 @@ namespace lve {
 
         VkPhysicalDeviceProperties properties;
 
-        //void init_imgui();
 
     private:
         void createInstance();

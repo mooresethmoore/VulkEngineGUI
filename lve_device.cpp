@@ -70,9 +70,7 @@ namespace lve {
 
         vkDestroySurfaceKHR(instance, surface_, nullptr);
         vkDestroyInstance(instance, nullptr);
-        //ImGui_ImplVulkan_Shutdown();
-        //ImGui_ImplGlfw_Shutdown();
-        //ImGui::DestroyContext();
+
     }
 
     void LveDevice::createInstance() {
