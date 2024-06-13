@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene.hpp"
+#include "sceneEditor.hpp"
 
 // std
 #include <memory>
@@ -19,6 +19,6 @@ namespace lve {
 		void run();
 
 	private:
-		Scene scene{};
+		SceneEditor scene{};
 	};
 }  // namespace lve

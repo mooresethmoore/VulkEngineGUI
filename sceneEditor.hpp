@@ -17,16 +17,16 @@
 #include "dependencies/entt.hpp"
 
 namespace lve {
-	class Scene {
+	class SceneEditor {
 	public:
 		static constexpr int WIDTH = 1920;
 		static constexpr int HEIGHT = 1080;
 
-		Scene();
-		~Scene();
+		SceneEditor();
+		~SceneEditor();
 
-		Scene(const Scene&) = delete;
-		Scene& operator=(const Scene&) = delete;
+		SceneEditor(const SceneEditor&) = delete;
+		SceneEditor& operator=(const SceneEditor&) = delete;
 
 		std::shared_ptr<entt::entity> loadObj(const std::string& filepath, const std::string& objName, glm::vec3 color = {0.f,0.f,0.f});
 		std::shared_ptr<entt::entity> makePointLightObj(float intensity = 10.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f), const std::string& objName="NoName");
@@ -43,7 +43,7 @@ namespace lve {
 	private:
 		void loadGameObjects();
 
-		LveWindow lveWindow{ WIDTH, HEIGHT, "Scene Editor!" };
+		LveWindow lveWindow{ WIDTH, HEIGHT, "SceneEditor Editor!" };
 		LveDevice lveDevice{ lveWindow };
 		LveRenderer lveRenderer{ lveWindow, lveDevice };
 

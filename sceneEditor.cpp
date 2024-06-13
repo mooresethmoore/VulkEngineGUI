@@ -1,4 +1,4 @@
-#include "scene.hpp"
+#include "sceneEditor.hpp"
 
 
 #include "keyboard_movement_controller.hpp"
@@ -36,7 +36,7 @@ static void check_vk_result(VkResult err)
 
 namespace lve {
 
-    void Scene::init_imgui() {
+    void SceneEditor::init_imgui() {
         // 1: create descriptor pool for IMGUI
         //  the size of the pool is very oversize, but it's copied from imgui demo
         //  itself.
@@ -142,7 +142,7 @@ namespace lve {
             });*/
     }
 
-    Scene::Scene() {
+    SceneEditor::SceneEditor() {
         globalPool =
             LveDescriptorPool::Builder(lveDevice)
             .setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -152,7 +152,7 @@ namespace lve {
         init_imgui();
     }
 
-    Scene::~Scene() {
+    SceneEditor::~SceneEditor() {
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -163,7 +163,7 @@ namespace lve {
     }
 
 
-    std::shared_ptr<entt::entity> Scene::loadObj(const std::string& filepath, const std::string& objName, glm::vec3 color){
+    std::shared_ptr<entt::entity> SceneEditor::loadObj(const std::string& filepath, const std::string& objName, glm::vec3 color){
         std::shared_ptr<LveModel> lveModel =
             LveModel::createModelFromFile(lveDevice, filepath);
         entt::entity gameObj = registry.create();
@@ -181,7 +181,7 @@ namespace lve {
         return std::make_shared<entt::entity>(gameObj);
     }
 
-    std::shared_ptr<entt::entity> Scene::makePointLightObj(float intensity, float radius, glm::vec3 color, const std::string& objName) {
+    std::shared_ptr<entt::entity> SceneEditor::makePointLightObj(float intensity, float radius, glm::vec3 color, const std::string& objName) {
         entt::entity gameObj = registry.create();
         entityMap[objName] = gameObj; // not checking for name overlap for now, don't do it
         auto& transform = registry.emplace<TransformComponent>(gameObj);
@@ -197,7 +197,7 @@ namespace lve {
         return std::make_shared<entt::entity>(gameObj);
     }
 
-    std::shared_ptr<entt::entity> Scene::makeCameraObj(glm::vec3 initialPosition, const std::string& objName) {
+    std::shared_ptr<entt::entity> SceneEditor::makeCameraObj(glm::vec3 initialPosition, const std::string& objName) {
         entt::entity gameObj = registry.create();
         entityMap[objName] = gameObj; // not checking for name overlap for now, don't do it
         auto& transform = registry.emplace<TransformComponent>(gameObj);
@@ -211,7 +211,7 @@ namespace lve {
     }
 
     template <typename ComponentType> 
-    ComponentType* Scene::getComponent(entt::entity entity) {
+    ComponentType* SceneEditor::getComponent(entt::entity entity) {
         /*auto* componentPtr = registry.try_get<ComponentType>(entity);
         if (componentPtr) {
             return std::shared_ptr<ComponentType>{componentPtr};
@@ -222,7 +222,7 @@ namespace lve {
         return registry.try_get<ComponentType>(entity);
     }
 
-    void Scene::loadGameObjects() {
+    void SceneEditor::loadGameObjects() {
         
         auto dice = loadObj("models/dice.obj", "dice");
         
@@ -285,7 +285,7 @@ namespace lve {
         
     }
 
-    void Scene::run() {
+    void SceneEditor::run() {
         std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<LveBuffer>(
