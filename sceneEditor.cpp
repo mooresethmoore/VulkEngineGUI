@@ -1,7 +1,8 @@
 #include "sceneEditor.hpp"
 
 
-#include "keyboard_movement_controller.hpp"
+
+#include "movement_controller.hpp"
 #include "lve_buffer.hpp"
 #include "lve_camera.hpp"
 #include "systems/simple_render_system.hpp"
@@ -202,7 +203,7 @@ namespace lve {
         entityMap[objName] = gameObj; // not checking for name overlap for now, don't do it
         auto& transform = registry.emplace<TransformComponent>(gameObj);
         transform.translation = initialPosition;
-        auto& cameraController = registry.emplace<KeyboardMovementController>(gameObj);
+        auto& cameraController = registry.emplace<MovementController>(gameObj, lveWindow.getGLFWwindow());
         
         auto& camera = registry.emplace<LveCamera>(gameObj);
 
@@ -327,7 +328,7 @@ namespace lve {
 
         auto cameraObj = makeCameraObj({ 0.f,0.f,-2.5f }, "camera");
         auto cameraPtr = getComponent<LveCamera>(*cameraObj);
-        auto cameraController = getComponent<KeyboardMovementController>(*cameraObj);
+        auto cameraController = getComponent<MovementController>(*cameraObj);
         bool show_demo_window = true; //imgui demo
         bool show_another_window = true; //imgui demo
 
@@ -345,7 +346,7 @@ namespace lve {
                 std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
             auto transform = (getComponent<TransformComponent>(*cameraObj));
-            cameraController->moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, *transform);
+            cameraController->moveInPlaneXZ(frameTime, *transform);
             cameraPtr->setViewYXZ(transform->translation, transform->rotation);
             float aspect = lveRenderer.getAspectRatio();
             cameraPtr->setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);

@@ -1,4 +1,4 @@
-#include "keyInput.hpp"
+#include "KeyInput.hpp"
 #include <algorithm>
 
 std::vector<KeyInput*> KeyInput::_instances;
