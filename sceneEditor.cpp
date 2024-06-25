@@ -39,7 +39,7 @@ namespace lve {
 
     void SceneEditor::init_imgui() {
         // 1: create descriptor pool for IMGUI
-        //  the size of the pool is very oversize, but it's copied from imgui demo
+        //  the size of the pool is very oversized, but it's copied from imgui demo
         //  itself.
 
         //TODO fix this, and possibly have this managed in the pool allocator
@@ -286,7 +286,7 @@ namespace lve {
         
     }
 
-    void SceneEditor::run() {
+    void SceneEditor::run() { //called in main
         std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<LveBuffer>(
