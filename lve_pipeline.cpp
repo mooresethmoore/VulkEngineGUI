@@ -42,6 +42,11 @@ namespace lve {
         return buffer;
     }
 
+    void LvePipeline::createComputePipeline(const std::string& compFilepath,
+        const PipelineConfigInfo& configInfo) {
+
+    }
+
     void LvePipeline::createGraphicsPipeline(
         const std::string& vertFilepath,
         const std::string& fragFilepath,
