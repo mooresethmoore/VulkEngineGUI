@@ -54,6 +54,9 @@ namespace lve {
             const std::string& fragFilepath,
             const PipelineConfigInfo& configInfo);
 
+        void createComputePipeline(const std::string& compFilepath,
+            const PipelineConfigInfo& configInfo);
+
         void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
         LveDevice& lveDevice;
